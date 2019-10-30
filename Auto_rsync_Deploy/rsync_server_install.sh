@@ -91,8 +91,6 @@ rm -rf /var/run/rsyncd.*
 ;;
 *)echo \"Usage:\$0 [start|stop|restart]\" >/usr/bin/rsync_admin
 esac" >/usr/bin/rsync_admin
-echo "/bin/rsync --daemon" >> /etc/rc.d/rc.local
-chmod +x /etc/rc.d/rc.local
 chmod +x /usr/bin/rsync_admin
 echo -e "\tadmin script:\t/usr/bin/rsync_admin"
 echo -e "\tauth_user:\t${AUTH_BAKUSER}"
