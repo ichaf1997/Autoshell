@@ -1,4 +1,4 @@
-Git is a distributed version control system.
-Git is free software distributed under the GPL.
-Git has a mutable index called stage.
-Git tracks changes of files.
+hi,guys !
+this is my first repository in github
+It 's very pleasant to learn shell by sharing my scripts in github with you !!
+If you have some good ideas with my scripts , comment it thanks !
