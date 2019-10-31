@@ -92,7 +92,14 @@ rm -rf /var/run/rsyncd.*
 *)echo \"Usage:\$0 [start|stop|restart]\" >/usr/bin/rsync_admin
 esac" >/usr/bin/rsync_admin
 chmod +x /usr/bin/rsync_admin
+# Create client_install script
+echo "#!/bin/bash
+echo ${AUTH_PASSWORD} >/etc/rsyncd.password
+chmod 600 /etc/rsyncd.password
+echo \"Usage: rsync -avz [--delete] [backup_dir] [backup_user]@[server_host]::[module_name] --password-file=/etc/rsyncd.password \"
+">$(pwd)/rsync_cilent_install.sh
 echo -e "\tadmin script:\t/usr/bin/rsync_admin"
+echo -e "\tclient install script:\t$(pwd)/rsync_cilent_install.sh"
 echo -e "\tauth_user:\t${AUTH_BAKUSER}"
 echo -e "\tpassword:\t${AUTH_PASSWORD}"
 echo -e "\tbackupdir:\t${BACKUP_DIR}"
