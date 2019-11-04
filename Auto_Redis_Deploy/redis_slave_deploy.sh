@@ -1,18 +1,18 @@
 #!/bin/bash
 # This script will create redis slave from redis master automatically 
 # Usage:
-# Step 1 : Set variables in redis.ini depend on your enviroment
+# Step 1 : Set variables in redis_slave_deploy.ini depend on your enviroment
 # Step 2 : Run $0 
 # Notice : Please run this script in your personal host instead of master or slave .
 
 # Check configuration 
 [ ! -f "$(pwd)/autoget.sh" ] && echo "$(pwd)/autoget.sh is needed" && exit 1
-[ ! -e "$(pwd)/redis.ini" ] && echo "$(pwd)/redis.ini is needed" && exit 1
+[ ! -e "$(pwd)/redis_slave_deploy.ini" ] && echo "$(pwd)/redis_slave_deploy.ini is needed" && exit 1
 [ -z "$MASTER_CONF_PATH" ] && MASTER_CONF_PATH=/etc/redis.conf
 [ -z "$REDIS_PACKAGE_DIR" ] && REDIS_PACKAGE_DIR=/usr/local/src
 [ -z "$REDIS_LOG_PATH" ] && REDIS_LOG_PATH=/tmp/redis.log
 [ ! -e "$REDIS_LOG_PATH" ] && touch ${REDIS_LOG_PATH}
-source $(pwd)/redis.ini
+source $(pwd)/redis_slave_deploy.ini
 
 # Check whether if run this script before
 [ -f "/tmp/redis_instll" ] && echo "Installed already !" && exit 0
