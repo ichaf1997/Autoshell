@@ -3,7 +3,7 @@
 # Usage:
 # Step 1 : Set variables in redis_slave_deploy.ini depend on your enviroment
 # Step 2 : Run $0 
-# Notice : Please run this script in your personal host instead of master or slave .
+# Notice : Please run this script in ready redis slave host.
 
 # Check configuration 
 [ ! -f "$(pwd)/autoget.sh" ] && echo "$(pwd)/autoget.sh is needed" && exit 1
@@ -15,7 +15,7 @@
 source $(pwd)/redis_slave_deploy.ini
 
 # Check whether if run this script before
-[ -f "/tmp/redis_instll" ] && echo "Installed already !" && exit 0
+[ -f "/tmp/redis_instll.lock" ] && echo "Installed already !" && exit 0
 
 # Define Log dump
 log_dump(){
@@ -80,6 +80,10 @@ IP=$(ip a|grep global|awk -F[" "]+ '{print $3}'|cut -d "/" -f 1)
 M_IP=$(cat /tmp/redis.conf |grep '^bind'|awk -F[" "]+ '{print $2}')
 M_PORT=$(cat /tmp/redis.conf |grep '^port'|awk -F[" "] '{print $2}')
 M_PASS=$(cat /tmp/redis.conf |grep '^requirepass'|awk -F[" "] '{print $2}'|sed 's/"//g')
+M_PERSISTENCE_DIR=$(cat /tmp/redis.conf|grep '^dir'|awk -F[" "] '{print $2}')
+if [ "$M_PERSISTENCE_DIR" != "./" ];then
+   [ ! -d "$M_PERSISTENCE_DIR" ] && mkdir -p $M_PERSISTENCE_DIR
+fi
 sed -i "s/^bind.*/bind ${IP}/g" /tmp/redis.conf
 sed -i '/^slaveof.*/d' /tmp/redis.conf
 sed -i '/^masterauth/d' /tmp/redis.conf
@@ -141,7 +145,7 @@ else
 fi
 
 # Create lock file
-touch /tmp/redis_instll
+touch /tmp/redis_instll.lock
 
 # Finally
 log_dump main "Redis slave create success"
