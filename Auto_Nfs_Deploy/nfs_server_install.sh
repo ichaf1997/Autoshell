@@ -2,8 +2,9 @@
 
 # Input
 PUBLIC_DIR=/public     ## Recommanded as a sparate Filesystem
-PUBLIC_NETWORK="192.168.142.*"
+PUBLIC_NETWORK="192.168.142.0/24"
 NFS_CONFIG="rw,sync,no_root_squash,no_wdelay"  ## /etc/exports
+#NFS_CONFIG="rw,sync,all_squash,no_wdelay,anonuid=998,anongid=996"  ## Squash user 
 
 # Install application
 rpm -qa|grep nfs-utils >/dev/null 2>&1
