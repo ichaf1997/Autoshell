@@ -67,11 +67,13 @@ log_bin_dir=$(cat /tmp/relay/conf/my.cnf |egrep "^log-bin.*$"|head -1|cut -d "="
 mkdir -p ${mysql_dir} ${data_dir} ${tmp_dir} ${log_bin_dir%/*} ${Source_conf_PATH%/*} >/dev/null 2>&1
 chown -R mysql.mysql ${mysql_dir} ${data_dir} ${tmp_dir} ${log_bin_dir%/*} ${Source_conf_PATH%/*} >/dev/null 2>&1
 chown -R mysql.mysql ${data_dir}
+
 #Copy Source Server my.cnf to Slave conf_dir
 cp /tmp/relay/conf/my.cnf ${Source_conf_PATH}
 chown -R mysql.mysql /$(echo ${Source_conf_PATH}|cut -d "/" -f 2)
 
 #Tar MySQL in Slave
+yum -y install gcc-c++ ncurses-devel
 tar -xvf ${MySQL_BIN_PACKAGE} -C ${mysql_dir} --strip-components 1
 chown -R mysql.mysql ${mysql_dir} >/dev/null 2>&1
 
