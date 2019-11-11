@@ -13,21 +13,29 @@ source $(pwd)/mysql_slave.ini
 if [ ! -f "$(pwd)/autoget.sh" ];then
     echo "$(pwd)/autoget.sh is not available ..."
     exit 1
+else
+    chmod u+x $(pwd)/autoget.sh
 fi
 
 if [ ! -f "$(pwd)/autoexec_xtra.sh" ];then
     echo "$(pwd)/autoexec_xtra.sh is not available ..."
     exit 1
+else
+    chmod u+x $(pwd)/autoexec_xtra.sh
 fi
 
 if [ ! -f "$(pwd)/autoexec_phy.sh" ];then
     echo "$(pwd)/autoexec_phy.sh is not available ..."
     exit 1
+else
+    chmod u+x $(pwd)/autoexec_phy.sh
 fi
 
 if [ ! -f "$(pwd)/autoexec_dump.sh" ];then
     echo "$(pwd)/autoexec_dump.sh is not available ..."
     exit 1
+else
+    chmod u+x $(pwd)/autoexec_dump.sh
 fi
 
 
