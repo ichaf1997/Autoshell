@@ -9,7 +9,7 @@ fi
 
 if [ "$(cat /etc/ssh/ssh_config|grep '^ConnectTimeout'|wc -l)" == "1" ]
 then
-    sed -i 's/^ConnectTimeout/ConnectTimeout 1/g' /etc/ssh/ssh_config
+    sed -i 's/^ConnectTimeout.*$/ConnectTimeout 1/g' /etc/ssh/ssh_config
 else
     echo 'ConnectTimeout 1' >> /etc/ssh/ssh_config
 fi

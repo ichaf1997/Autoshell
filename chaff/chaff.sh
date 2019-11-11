@@ -87,7 +87,7 @@ echo "
  # ---------------------------------------------- #
 
     1) Send ssh-keygen      2) Send File
-    3) Check Os status      e) Send command
+                            e) Send command
 
                             q) Quit
 
@@ -177,16 +177,6 @@ ssh_keygen(){
           fi
       fi
    fi   
-}
-Get_status(){      
-      ssh $1 "$2" 
-      if [ "$exec_status" == "255" ]
-      then
-          log_dump warnning "Excute command \"$2\" fail ::: Couldn't connect - [$3]:$1"
-      elif [ "$exec_status" == "1" ]
-      then 
-          log_dump warnning "Excute command \"$2\" fail ::: in [$3]:$1"
-      fi
 }
 
 
@@ -290,104 +280,6 @@ do
       fi
       Menu
     ;;
-    3)
-      Select
-    if [ "$sel" == "b" ];then
-         Menu
-         continue
-    else
-         if [ "$sel" == "a" ];then
-            log_dump info "Check System load and Memory usage in [$(echo ${group_name[@]})]"
-            for ((r=0;r<${num};r++))
-            do  
-                
-                while read line
-                do
-                   [ ! -e "/tmp/${group_name[$r]}-mem.info" ] && touch /tmp/${group_name[$r]}-mem.info
-                   [ ! -e "/tmp/${group_name[$r]}-load.info" ] && touch /tmp/${group_name[$r]}-load.info
-                                      
-                   #send_cmd $(echo ${line} | awk '{print $1}') $(echo ${line} | awk '{print $2}') "awk 'BEGIN{printf \"%.2f%\\n\",('$(free |grep "Mem"|awk '{print $3}')'/'$(free |grep "Mem"|awk '{print $2}')')*100}'>/tmp/mem.info" "$(echo ${group_name[@]})" 
-                   if [ "$(cat /tmp/qwerasdf)" == "0" ];then                    
-                      cd ${chaff_moduledir}
-                      [ ! -x "${chaff_moduledir}/get_status.sh" ] && chmod +x ${chaff_moduledir}/get_status.sh
-                      ./get_status.sh $(echo ${line} | awk '{print $1}') $(echo ${line} | awk '{print $2}') "/tmp/mem.info" "/tmp"
-                      echo "$(cat /tmp/mem.info)">>/tmp/${group_name[$r]}-mem.info
-                   else
-                      echo "">>/tmp/${group_name[$r]}-mem.info
-                   fi
-                   send_cmd $(echo ${line} | awk '{print $1}') $(echo ${line} | awk '{print $2}') "uptime|cut -d ":" -f 5|sed 's/^ //g'>/tmp/load.info" "$(echo ${group_name[@]})"
-                   if [ "$(cat /tmp/qwerasdf)" == "0" ];then
-                      cd ${chaff_moduledir}
-                      [ ! -x "${chaff_moduledir}/get_status.sh" ] && chmod +x ${chaff_moduledir}/get_status.sh
-                      ./get_status.sh $(echo ${line} | awk '{print $1}') $(echo ${line} | awk '{print $2}') "/tmp/load.info" "/tmp"
-                      echo "$(cat /tmp/load.info)">>/tmp/${group_name[$r]}-load.info
-                   else
-                      echo "">>/tmp/${group_name[$r]}-load.info
-                   fi
-                done < ${chaff_groupdir}/${group_name[$r]}.group
-            done
-            echo " # ---------------------------------------------------- #
-"
-            for ((r=0;r<${num};r++))
-            do
-            echo -e "\t[${group_name[$r]}]"
-                 n=0
-                 while read line
-                 do
-                    let n=$n+1
-                    echo -e "\t$(echo ${line}|awk '{print $1}')\tMemory_Usage:$(grep -n "$(cat "/tmp/${group_name[$r]}-mem.info")" "/tmp/${group_name[$r]}-mem.info"|grep "$n:"|cut -d ":" -f 2)\tLoad average:$(grep -n "$(cat "/tmp/${group_name[$r]}-load.info")" "/tmp/${group_name[$r]}-load.info"|grep "$n:"|cut -d ":" -f 2)"
-                 done < ${chaff_groupdir}/${group_name[$r]}.group
-                 rm -rf /tmp/${group_name[$r]}-mem.info
-                 rm -rf /tmp/${group_nane[$r]}-load.info
-                 while read line
-                 do
-                     mem= 
-                     echo -e "\t$(echo ${line}|awk '{print $1}')\tMemory_Usage:$(ssh 192.168.142.10 "awk 'BEGIN{printf \"%.2f%\\n\",('$(free |grep "Mem"|awk '{print $3}')'/'$(free |grep "Mem"|awk '{print $2}')')*100}' || echo Unknow")"
-                 done
-            done
-         else
-            log_dump info "Check System load and Memory usage in [$(echo ${group_name[$sel]})]"
-            [ ! -e "/tmp/${group_name[$sel]}-mem.info" ] && touch /tmp/${group_name[$sel]}-mem.info
-            [ ! -e "/tmp/${group_name[$sel]}-load.info" ] && touch /tmp/${group_name[$sel]}-load.info
-            while read line
-            do
-               send_cmd $(echo ${line} | awk '{print $1}') $(echo ${line} | awk '{print $2}') "awk 'BEGIN{printf \"%.2f%\\n\",('$(free |grep "Mem"|awk '{print $3}')'/'$(free |grep "Mem"|awk '{print $2}')')*100}'>/tmp/mem.info" "$(echo ${group_name[$sel]})"
-               if [ "$(cat /tmp/qwerasdf)" == "0" ];then
-                      cd ${chaff_moduledir}
-                      [ ! -x "${chaff_moduledir}/get_status.sh" ] && chmod +x ${chaff_moduledir}/get_status.sh
-               ./get_status.sh $(echo ${line} | awk '{print $1}') $(echo ${line} | awk '{print $2}') "/tmp/mem.info" "/tmp"
-                      echo "$(cat /tmp/mem.info)">>/tmp/${group_name[$sel]}-mem.info
-               else
-                      echo "">>/tmp/${group_name[$sel]}-mem.info
-               fi
-
-               send_cmd $(echo ${line} | awk '{print $1}') $(echo ${line} | awk '{print $2}') "uptime|cut -d ":" -f 5|sed 's/^ //g'>/tmp/load.info" "$(echo ${group_name[$sel]})"
-               if [ "$(cat /tmp/qwerasdf)" == "0" ];then
-                      cd ${chaff_moduledir}
-                      [ ! -x "${chaff_moduledir}/get_status.sh" ] && chmod +x ${chaff_moduledir}/get_status.sh
-                      ./get_status.sh $(echo ${line} | awk '{print $1}') $(echo ${line} | awk '{print $2}') "/tmp/load.info" "/tmp"
-                      echo "$(cat /tmp/load.info)">>/tmp/${group_name[$sel]}-load.info
-               else
-                      echo "">>/tmp/${group_name[$sel]}-load.info
-               fi
-            done < ${chaff_groupdir}/${group_name[$sel]}.group
-
-            echo " # ---------------------------------------------------- #
-"
-            echo -e "\t[${group_name[$sel]}]"
-            n=0
-            while read line
-            do
-               let n=$n+1
-               echo -e "\t$(echo ${line}|awk '{print $1}')\tMemory_Usage:$(grep -n "$(cat "/tmp/${group_name[$sel]}-mem.info")" "/tmp/${group_name[$sel]}-mem.info"|grep "$n:"|cut -d ":" -f 2)\tLoad average:$(grep -n "$(cat "/tmp/${group_name[$sel]}-load.info")" "/tmp/${group_name[$sel]}-load.info"|grep "$n:"|cut -d ":" -f 2)"
-            done < ${chaff_groupdir}/${group_name[$sel]}.group
-            rm -rf /tmp/${group_name[$sel]}-mem.info
-         fi
-    fi
-    echo "
- # ---------------------------------------------------- #"
-    Menu
-    ;;
     e)
       if [ ! -e "/tmp/kg.lock" ]
       then
@@ -423,23 +315,24 @@ do
               log_dump info "Excute command \"$com\" in [$(echo ${group_name[@]})]"  
               for ((r=0;r<${num};r++))
               do
-                  while read line
+                  for line in `cat ${chaff_groupdir}/${group_name[$r]}.group`
                   do
-                     send_cmd $(echo ${line} | awk '{aprint $1}') "$com" "$(echo ${group_name[@]})" 
-                  done < ${chaff_groupdir}/${group_name[$r]}.group
+                     send_cmd $(echo ${line} | awk '{print $1}') "$com" "$(echo ${group_name[@]})" >/dev/null 2>&1
+                  done 
               done
            else    
               log_dump info "Excute command \"$com\" in [${group_name[$sel]}]"
-              while read line
+              for line in `cat ${chaff_groupdir}/${group_name[$sel]}.group`
               do
-                  send_cmd $(echo ${line} | awk '{print $1}') "$com" "$(echo ${group_name[$sel]})"
-              done < ${chaff_groupdir}/${group_name[$sel]}.group
+                  send_cmd $(echo ${line} | awk '{print $1}') "$com" "$(echo ${group_name[$sel]})" >/dev/null 2
+>&1
+              done
            fi
       fi
       Menu
     ;;
     q)break
     ;;
-    *)echo "Usage [1-3] e or q"
+    *)echo "Usage [1-2] e or q"
     esac
 done
