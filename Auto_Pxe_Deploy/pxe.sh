@@ -27,8 +27,8 @@ idhcp(){
        action "Installing Successfully !" /bin/true
    fi
    echo "Configure DHCP ..."
-   ip=$(ip a|grep "brd"|grep "inet"|awk -F[" "]+ '{print $3}'|cut -d "/" -f 1)
-   gw=$(route -n|grep "UG"|awk -F[" "]+ '{print $2}')   
+   ip=$(ip a|grep "brd"|grep "inet"|awk '{print $2}'|cut -d "/" -f 1)
+   gw=$(route -n|grep "UG"|awk '{print $2}')   
    sleep 1
    while true 
    do 
@@ -112,10 +112,10 @@ ipex(){
       action "Checking ks.cfg failed ! " /bin/false
       while true
       do
-         read -p "Please input the ks.cfg direction ( example: /root/ks.cfg ) : " ks
-         [ ! -f "${ks}/ks.cfg" ] && echo "${ks}/ks.cfg is not exist ! " || break
+         read -p "Please input the ks.cfg path ( example: /root/ks.cfg ) : " ks
+         [ ! -f "${ks}" ] && echo "$ks is not exist ! " || break
       done
-      cp -f ${ks}/ks.cfg /public/cfg
+      cp -f ${ks} /public/cfg
       action "Checking ks.cfg Successfully ! " /bin/true
    else
       cp -f $(pwd)/ks.cfg /public/cfg
@@ -123,7 +123,10 @@ ipex(){
    fi 
    chmod +r /public/cfg/ks.cfg
    #sed -i '/^nfs.*/d' /public/cfg/ks.cfg
-   sed -i "4a nfs --server=${ip} --dir=${osdir}" /public/cfg/ks.cfg
+   if [ "$(cat /public/cfg/ks.cfg|grep "^nfs --server="|wc -l)" == "0" ]
+   then
+       sed -i "4a nfs --server=${ip} --dir=${osdir}" /public/cfg/ks.cfg
+   fi
    echo "default 1
 timeout 100
 display boot.msg
@@ -145,17 +148,20 @@ label 1
       action "Checking ks.cfg failed ! " /bin/false
       while true
       do
-         read -p "Please input the ks.cfg direction ( example: /root/ks.cfg ) : " ks
-         [ ! -f "${ks}/ks.cfg" ] && echo "${ks}/ks.cfg is not exist ! " || break
+         read -p "Please input the ks.cfg path ( example: /root/ks.cfg ) : " ks
+         [ ! -f "${ks}" ] && echo "${ks} is not exist ! " || break
       done
-      cp -f ${ks}/ks.cfg /var/www/html/cfg
+      cp -f ${ks} /var/www/html/cfg
       action "Checking ks.cfg Successfully ! " /bin/true
    else
       cp -f $(pwd)/ks.cfg /var/www/html/cfg
       action "Checking ks.cfg Successfully ! " /bin/true
    fi
    chmod +r /var/www/html/cfg/ks.cfg
-   sed -i "4a url --url=\"http\:\/\/${ip}\/iso\"" /var/www/html/cfg/ks.cfg
+   if [ "$(cat /var/www/html/cfg/ks.cfg|grep "^url --url"|wc -l)" == "0" ]
+   then
+       sed -i "4a url --url=\"http\:\/\/${ip}\/iso\"" /var/www/html/cfg/ks.cfg
+   fi
    echo "default 1
 timeout 100
 display boot.msg
@@ -177,17 +183,20 @@ label 1
       action "Checking ks.cfg failed ! " /bin/false
       while true
       do
-         read -p "Please input the ks.cfg direction ( example: /root/ks.cfg ) : " ks
-         [ ! -f "${ks}/ks.cfg" ] && echo "${ks}/ks.cfg is not exist ! " || break
+         read -p "Please input the ks.cfg path ( example: /root/ks.cfg ) : " ks
+         [ ! -f "${ks}" ] && echo "${ks} is not exist ! " || break
       done
-      cp -f ${ks}/ks.cfg /var/ftp/cfg/
+      cp -f ${ks} /var/ftp/cfg/
       action "Checking ks.cfg Successfully ! " /bin/true
    else
       cp -f $(pwd)/ks.cfg /var/ftp/cfg/
       action "Checking ks.cfg Successfully ! " /bin/true
    fi
    chmod +r /var/ftp/cfg/ks.cfg
-   sed -i "4a url --url=\"ftp\:\/\/${ip}\/iso\"" /var/ftp/cfg/ks.cfg   
+   if [ "$(cat /var/ftp/cfg/ks.cfg|grep "^url --url="|wc -l)" == "0" ]
+   then
+       sed -i "4a url --url=\"ftp\:\/\/${ip}\/iso\"" /var/ftp/cfg/ks.cfg   
+   fi
    echo "default 1
 timeout 100
 display boot.msg
