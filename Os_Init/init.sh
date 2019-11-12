@@ -20,7 +20,7 @@ YUM_repo="DVD"         # If you don't want to use local repo . modify here as UR
 TIME_SYNC_FROM="ntp1.aliyun.com" 
 APP_LIST=(vim wget mlocate net-tools gcc* openssl* pcre-devel) # APPS arrary , add apps you want to install here , Be careful to use space as separator for every app .
 
-[ -e "/tmp/init.lock" ] && exit 0
+[ -e "/tmp/init.lock" ] && echo "Don't run this script repeatedly !" && exit 0
 echo -e "Time\t$(date +%a\ %b\ %d\ %T\ %Y) - [Start]" > init.log
 log_path=$(pwd)/init.log
 
@@ -211,7 +211,7 @@ EOF
 }
 func0
 
-echo -e "Time\t$(date +%a\ %b\ %d\ %T\ %Y) - [Complete]" > init.log
+echo -e "Time\t$(date +%a\ %b\ %d\ %T\ %Y) - [Complete]" >> $log_path
 
 # Generate lock file
 touch /tmp/init.lock
