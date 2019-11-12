@@ -103,6 +103,21 @@ func2(){
 }
 func2
 
+# Time SYNC
+rpm -qa|grep ntp >/dev/null 2>&1
+if [ "$?" != "0" ];then
+    yum -y install ntp >/dev/null 2>&1
+    if [ "$?" != "0" ];then
+        echo "*/5 * * * * /usr/sbin/ntpdate $TIME_SYNC_FROM">/var/spool/cron/root
+        LOG_DUMP ok "time sync from $TIME_SYNC_FROM"
+    else
+        LOG_DUMP no "time sync from $TIME_SYNC_FROM :: Download ntp failed"
+    fi
+else
+    echo "*/5 * * * * /usr/sbin/ntpdate $TIME_SYNC_FROM">/var/spool/cron/root
+    LOG_DUMP ok "time sync from $TIME_SYNC_FROM"
+fi        
+
 # Hostname
 if [ $HOST_NAME != "" ]
 then
