@@ -233,10 +233,12 @@ ihttp(){
    echo "Configure HTTP ..."
    sleep 1
    sed -i "277i ServerName 127.0.0.1:80" /etc/httpd/conf/httpd.conf
-   [ ! -d "/var/www/html/iso" ] && mkdir -p /var/www/html/iso
-   blkid | grep "sr0" >/dev/null 2>&1
-   [ "$?" == "0" ] && umount -lf /dev/sr0 >/dev/null 2>&1
-   mount /dev/sr0 /var/www/html/iso >/dev/null 2>&1
+   #[ ! -d "/var/www/html/iso" ] && mkdir -p /var/www/html/iso
+   #blkid | grep "sr0" >/dev/null 2>&1
+   #[ "$?" == "0" ] && umount -lf /dev/sr0 >/dev/null 2>&1
+   #mount /dev/sr0 /var/www/html/iso >/dev/null 2>&1
+   sr0_dir=$(df -h|grep sr0|awk '{print $NF}')
+   ln -s ${sr0_dir} /var/www/html/iso
    action "HTTP configure successfully !" /bin/true
 }
 
@@ -253,10 +255,12 @@ iftp(){
    fi
    echo "Configure VsFTP ..."
    sleep 1
-   [ ! -d "/var/ftp/iso" ] && mkdir -p /var/ftp/iso
-   blkid | grep "sr0" >/dev/null 2>&1
-   [ "$?" == "0" ] && umount -lf /dev/sr0 >/dev/null 2>&1
-   mount /dev/sr0 /var/ftp/iso >/dev/nul 2>&1
+  # [ ! -d "/var/ftp/iso" ] && mkdir -p /var/ftp/iso
+  # blkid | grep "sr0" >/dev/null 2>&1
+  # [ "$?" == "0" ] && umount -lf /dev/sr0 >/dev/null 2>&1
+  # mount /dev/sr0 /var/ftp/iso >/dev/nul 2>&1
+   sr0_dir=$(df -h|grep sr0|awk '{print $NF}')
+   ln -s ${sr0_dir} /var/www/html/iso
    action "VsFTP configure successfully !" /bin/true
 }
 
