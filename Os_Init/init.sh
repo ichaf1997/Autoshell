@@ -21,7 +21,7 @@ TIME_SYNC_FROM="ntp1.aliyun.com"
 APP_LIST=(vim wget mlocate net-tools gcc* openssl* pcre-devel) # APPS arrary , add apps you want to install here , Be careful to use space as separator for every app .
 
 [ -e "/tmp/init.lock" ] && exit 0
-echo -e "Time\t$(date +%a\ %b\ %d\ %T\ %Y) - [Start]" >> init.log
+echo -e "Time\t$(date +%a\ %b\ %d\ %T\ %Y) - [Start]" > init.log
 log_path=$(pwd)/init.log
 
 # Define log format
@@ -37,7 +37,7 @@ LOG_DUMP(){
 
 # Repo 
 func1(){
-  case $1
+  case $1 in
   DVD)
       if [ "$(blkid|grep iso9660|wc -l)" == "1" ]
       then
@@ -107,7 +107,7 @@ func2
 rpm -qa|grep ntp >/dev/null 2>&1
 if [ "$?" != "0" ];then
     yum -y install ntp >/dev/null 2>&1
-    if [ "$?" != "0" ];then
+    if [ "$?" == "0" ];then
         echo "*/5 * * * * /usr/sbin/ntpdate $TIME_SYNC_FROM">/var/spool/cron/root
         LOG_DUMP ok "time sync from $TIME_SYNC_FROM"
     else
@@ -119,7 +119,7 @@ else
 fi        
 
 # Hostname
-if [ $HOST_NAME != "" ]
+if [ -n "$HOST_NAME" ]
 then
     hostnamectl set-hostname $HOST_NAME && exec bash
     LOG_DUMP ok "modify hostname : $HOST_NAME"
@@ -210,3 +210,8 @@ EOF
 /sbin/sysctl -p
 }
 func0
+
+echo -e "Time\t$(date +%a\ %b\ %d\ %T\ %Y) - [Complete]" > init.log
+
+# Generate lock file
+touch /tmp/init.lock
