@@ -121,7 +121,7 @@ fi
 # Hostname
 if [ -n "$HOST_NAME" ]
 then
-    hostnamectl set-hostname $HOST_NAME && exec bash
+    hostnamectl set-hostname $HOST_NAME 
     LOG_DUMP ok "modify hostname : $HOST_NAME"
 fi
 
@@ -183,6 +183,7 @@ func0(){
   sed -i '/linux16 \/boot\/vmlinuz-3/{s/rhgb quiet/vga=817/}' /boot/grub2/grub.cfg
   echo "set ts=2" >> /etc/vimrc
   sed -i 's/#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
+  cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
   cat >> /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
 net.ipv4.ip_local_port_range = 1024 65536
@@ -215,3 +216,6 @@ echo -e "Time\t$(date +%a\ %b\ %d\ %T\ %Y) - [Complete]" >> $log_path
 
 # Generate lock file
 touch /tmp/init.lock
+
+# reboot
+init 6
