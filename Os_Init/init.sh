@@ -14,8 +14,10 @@ NetworkManager_ENABLE=0
 # Input [ string ]
 
 HOST_NAME=""           # custom hostname , add here
-SOFT_NOFILE=65536      # modify /etc/security/limits.conf 
-HARD_NOFILE=65536
+SOFT_NOFILE=65535      # modify /etc/security/limits.conf 
+HARD_NOFILE=65535
+SOFT_NOPROC=65535
+HARD_NOPROC=65535
 YUM_repo="DVD"         # If you don't want to use local repo . modify here as URL
 TIME_SYNC_FROM="ntp1.aliyun.com" 
 APP_LIST=(vim wget mlocate net-tools gcc* openssl* pcre-devel) # APPS arrary , add apps you want to install here , Be careful to use space as separator for every app .
@@ -136,9 +138,11 @@ grep "# MaxFileControl" /etc/rc.local >/dev/null 2>&1
 if [ "$?" != "0" ]
 then
     cat >> /etc/security/limits.conf << EOF
-# MaxFileControl
+# MaxFileControl by Init.sh
 *           soft   nofile       $SOFT_NOFILE
 *           hard   nofile       $HARD_NOFILE
+*           soft   noproc       $SOFT_NOPROC
+*           hard   noproc       $HARD_NOPROC     
 EOF
     ulimit -n $HARD_NOFILE
     LOG_DUMP ok "modify MaxFileControl soft=$SOFT_NOFILE hard=$HARD_NOFILE"

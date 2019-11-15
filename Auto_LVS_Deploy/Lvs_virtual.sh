@@ -9,7 +9,7 @@ BOOTUP_ENABLE=1      # value 1 means allow bootup , else deny
 
 # Install ipvsadm 
 [ "$(rpm -qa|grep ipvsadm|wc -l)" == "0" ] && yum -y install ipvsadm
-[ "$(ipvsadm -v|wc -l)" != "0" ] && echo "ipvsadm install failed . Please check your repo"
+[ "$(ipvsadm -v|wc -l)" == "0" ] && echo "ipvsadm install failed . Please check your repo"
 
 # Define function
 case $1 in
