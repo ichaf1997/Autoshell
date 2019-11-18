@@ -1,0 +1,138 @@
+#!/bin/bash
+# This script will install redis automatically
+# Test Version Redis 5.0.6
+# Usage : ./redis_admin [install|remove|]
+
+# Check lg.cnf is primary
+[ ! -f "redis_admin.ini" ] && echo "$(pwd)/redis_install.ini is needed ..Stop here" && exit 1
+source redis_admin.ini
+
+# Check Input variables number
+[ $# -ne 1 ] && echo "Usage : ./redis [install|remove|]" && exit 0
+
+# Wget is needed when run this script
+yum -y install wget >/dev/null 2>&1
+[ $(rpm -qa|grep wget|wc -l) -eq 0 ] && echo "Unable to install wget . Please install wget by yourself before run this script" && exit 0
+
+case $1 in
+install)
+        ## Check lock file whether if exist
+        if [[ $(cat /tmp/rds_adm.lock) -eq 1 ]]
+        then
+           echo "You had already install before !  Nothing to do "
+           exit 0
+        fi            
+        ## Download package
+        if [ ! -e "${REDIS_URL##*/}" ]    
+        then
+             wget $REDIS_URL 
+             [ $? -ne 0 ] && echo "Unalbe to download Package from $REDIS_URL " && exit 0
+        fi
+        ## Uncompress package
+        if [ ! -d "${REDIS_URL##*/}" ]
+        then
+            tar -xzf ${REDIS_URL##*/}
+        fi
+        ## Compile
+        package_name=$(echo ${REDIS_URL##*/}|sed 's/.tar.gz//g')
+        cd $package_name
+        make
+        [ $? -ne 0 ] && echo "Compile failed . "
+        cd src/
+        cp -f redis-benchmark redis-check-aof redis-check-rdb redis-cli redis-sentinel redis-server redis-trib.rb /usr/local/bin/
+        ## Confguration
+        [ ! -d "/etc/redis" ] && mkdir -p /etc/redis
+        cd ..
+        cp -f redis.conf /etc/redis/${REDIS_PORT}.conf
+        sed -i 's/^daemonize.*/daemonize yes/g' /etc/redis/${REDIS_PORT}.conf
+        sed -i "/^requirepass.*/d" /etc/redis/${REDIS_PORT}.conf
+        sed -i "/^bind.*/d" /etc/redis/${REDIS_PORT}.conf
+        redis_persistence_dir=$(echo ${REDIS_PERSISTENCE_DIR}|sed 's/\//\\\//g')
+        if [ "$REDIS_log_enable" == "1" ];then
+           [ ! -d "${REDIS_log_file%/*}" ] && mkdir -p ${REDIS_log_file%/*}
+           log_file=$(echo ${REDIS_log_file}|sed 's/\//\\\//g')
+           sed -i "s/^logfile.*/logfile ${log_file}/g" /etc/redis/${REDIS_PORT}.conf
+           sed -i "s/^loglevel.*/loglevel ${REDIS_log_level}/g" /etc/redis/${REDIS_PORT}.conf
+        fi
+        sed -i "/^rename-command.*/d" /etc/redis/${REDIS_PORT}.conf
+        sed -i "s/^dir.*/dir ${redis_persistence_dir}/g" /etc/redis/${REDIS_PORT}.conf
+        sed -i "s/6379/${REDIS_PORT}/g" /etc/redis/${REDIS_PORT}.conf
+        sed -i "s/^protected-mode.*/protected-mode no/g" /etc/redis/${REDIS_PORT}.conf
+        echo "requirepass ${REDIS_PASSWORD}" >> /etc/redis/${REDIS_PORT}.conf
+        echo "bind ${REDIS_BIND}" >>/etc/redis/${REDIS_PORT}.conf
+        [ ! -d "$REDIS_PERSISTENCE_DIR" ] && mkdir -p $REDIS_PERSISTENCE_DIR
+        [ ! -d "/etc/sentinel" ] && mkdir -p /etc/sentinel
+        echo "masterauth ${REDIS_PASSWORD}" >> /etc/redis/${REDIS_PORT}.conf
+        echo "port 1${REDIS_PORT}
+bind ${REDIS_BIND}
+daemonize yes
+logfile ${REDIS_log_file%/*}/1${REDIS_PORT}_sentinel.log
+sentinel monitor manager1 ${REDIS_BIND} ${REDIS_PORT} 2
+sentinel auth-pass manager1 ${REDIS_PASSWORD}
+sentinel down-after-milliseconds manager1 60000
+sentinel failover-timeout manager1 180000
+sentinel parallel-syncs manager1 1" > /etc/sentinel/${REDIS_PORT}.conf
+        ## Add Systemd
+echo "#!/bin/bash
+REDISPORT=$REDIS_PORT
+EXEC=/usr/local/bin/redis-server
+CLIEXEC=/usr/local/bin/redis-cli
+BIND=$REDIS_BIND
+PASSWORD=$REDIS_PASSWORD
+
+PIDFILE=/var/run/redis_\${REDISPORT}.pid
+CONF=\"/etc/redis/\${REDISPORT}.conf\"
+case \"\$1\" in
+    start)
+        if [ -f \$PIDFILE ]
+        then
+                echo \"\$PIDFILE exists, process is already running or crashed\"
+        else
+                echo \"Starting Redis server...\"
+                \$EXEC \$CONF --port \$REDISPORT
+        fi
+        ;;
+    stop)
+        if [ ! -f \$PIDFILE ]
+        then
+                echo \"\$PIDFILE does not exist, process is not running\"
+        else
+                PID=\$(cat \$PIDFILE)
+                echo \"Stopping ...\"
+                \$CLIEXEC -p \$REDISPORT -h \$BIND -a \$PASSWORD shutdown
+                while [ -x /proc/\${PID} ]
+                do
+                    echo \"Waiting for Redis to shutdown ...\"
+                    sleep 1
+                done
+                echo \"Redis stopped\"
+        fi
+        ;;
+    *)
+        echo \"Please use start or stop as first argument\"
+        ;;
+esac" >/etc/init.d/redis
+       chmod +x /etc/init.d/redis 
+       echo 1 > /tmp/rds_adm.lock
+;;
+remove)
+        ## Check lock file whether if exist
+        if [[ $(cat /tmp/rds_adm.lock) -eq 0 || ! -e /tmp/rds_adm.lock ]]
+        then
+           echo "Not installed before . nothing to do "
+           exit 0
+        fi
+        ## Remove
+        rm -rf $package_name
+        rm -rf ${REDIS_URL##*/}
+        rm -rf /usr/local/bin/redis*
+        rm -rf /etc/redis
+        rm -rf /etc/sentinel
+        rm -rf /etc/init.d/redis
+        ## Update lock file
+        echo 0 > /tmp/rds_adm.lock
+;;
+*)
+        echo "Usage : ./redis [install|remove|]"
+esac
+       
