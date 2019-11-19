@@ -29,7 +29,8 @@ log_dump(){
    fi   
 }
 
-# Get Master configuration file 
+# Get Master configuration file
+[ "$(rpm -qa|grep expect|wc -l)" == "0" ] && yum -y install expect >/dev/null 2>&1
 [ ! -x "$(pwd)/autoget.sh" ] && chmod +x $(pwd)/autoget.sh
 ./autoget.sh $M_HOST $M_PASS root /tmp/redis.conf $MASTER_CONF_PATH 
 if [ "$?" != "0" ];then
@@ -76,9 +77,11 @@ if [ "$?" != "0" ];then
 else
    log_dump main "Make install success ."
 fi
+cd src/
+cp -f redis-benchmark redis-check-aof redis-check-rdb redis-cli redis-sentinel redis-server redis-trib.rb /usr/local/bin/
 
 # Edit configuration
-IP=$(ip a|grep global|awk '{print $3}'|cut -d "/" -f 1)
+IP=$(ip a|grep global|awk '{print $2}'|cut -d "/" -f 1)
 M_IP=$(cat /tmp/redis.conf |grep '^bind'|awk '{print $2}')
 M_PORT=$(cat /tmp/redis.conf |grep '^port'|awk '{print $2}')
 M_PASS=$(cat /tmp/redis.conf |grep '^requirepass'|awk '{print $2}'|sed 's/"//g')
