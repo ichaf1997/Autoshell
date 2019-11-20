@@ -1,0 +1,108 @@
+#!/bin/bash
+# MySQL backup script . Base on Xtrabackup tool
+# To run this script , follow these steps
+# mysql>grant all privileges on *.* to xtra@'localhost' identified by '123123'
+
+# Input [Global]
+CONF_PATH=/etc/my.cnf
+USER=xtra
+PASS=123123
+xtra_path=/usr/local/bin/innobackupex
+
+# Input [Full Backup]
+BAK_DIR=/backup/mysql/full   # If not exist , generate it automatically
+
+# Input [Inc Backup]
+base_dir=/backup/mysql/inc/$(date -d "last-day" +%Y%m%d)      # Last day
+#base_dir=/backup/mysql/full/20191120
+inc_dir=/backup/mysql/inc   # If not exist , generate it automatically
+
+# To check backup account whether if available
+Check(){   
+   MYSQL_PATH=$(cat $CONF_PATH|grep ^basedir|cut -d= -f2|sed 's/ //g')
+   ${MYSQL_PATH}/bin/mysqladmin -u${USER} -p${PASS} ping >/dev/null 2>&1
+   [ $? -eq 0 ] && status=1 || status=0
+}
+
+# Full Backup
+Backup(){
+   [ ! -d "$BAK_DIR" ] && mkdir -p $BAK_DIR
+   xtra_cmd="${xtra_path} --defaults-file=${CONF_PATH} --user=${USER} --password=${PASS} --stream=tar /tmp"
+   touch ${BAK_DIR}/$(date +%Y%m%d).log
+   echo "$(date +%F\ %T) - [Start] MySQL full backup Start" >> ${BAK_DIR}/$(date +%Y%m%d).log
+   echo "$(date +%F\ %T) - [Info] execute ## cp -f $CONF_PATH ${BAK_DIR}/$(date +%Y%m%d)_my.cnf" >> ${BAK_DIR}/$(date +%Y%m%d).log
+   cp -f $CONF_PATH ${BAK_DIR}/$(date +%Y%m%d)_my.cnf
+   echo "$(date +%F\ %T) - [Info] execute ## ${xtra_cmd} | gzip > ${BAK_DIR}/$(date +%Y%m%d).tar.gz" >> ${BAK_DIR}/$(date +%Y%m%d).log
+   ${xtra_cmd} 2>>${BAK_DIR}/$(date +%Y%m%d).log | gzip > ${BAK_DIR}/$(date +%Y%m%d).tar.gz
+   echo "$(date +%F\ %T) - [Finish] MySQL full backup finish" >> ${BAK_DIR}/$(date +%Y%m%d).log
+   echo "Backup file : ${BAK_DIR}/$(date +%Y%m%d).tar.gz ## Size : $(du -sh ${BAK_DIR}/$(date +%Y%m%d).tar.gz|awk '{print $1}')" >> ${BAK_DIR}/$(date +%Y%m%d).log
+}
+
+# Incremental Backup
+inc_Backup(){
+   [ ! -d "$inc_dir" ] && mkdir -p $inc_dir
+   [ ! -d "${inc_dir}/tmp" ] && mkdir ${inc_dir}/tmp
+   xtra_cmd="${xtra_path} --defaults-file=${CONF_PATH} --user=${USER} --password=${PASS} --incremental --incremental-basedir=${base_dir} ${inc_dir}/tmp --stream=xbstream"
+   touch ${inc_dir}/$(date +%Y%m%d).log
+   echo "$(date +%F\ %T) - [Start] MySQL Incremental backup Start" >> ${inc_dir}/$(date +%Y%m%d).log
+   echo "$(date +%F\ %T) - [Info] execute ## ${xtra_cmd} >${inc_dir}/$(date +%Y%m%d).xbstream" >> ${inc_dir}/$(date +%Y%m%d).log
+   ${xtra_cmd} 2>>${inc_dir}/$(date +%Y%m%d).log >${inc_dir}/$(date +%Y%m%d).xbstream
+   echo "$(date +%F\ %T) - [Finish] MySQL Incremental backup finish" >> ${inc_dir}/$(date +%Y%m%d).log
+   echo "Backup file : ${inc_dir}/$(date +%Y%m%d).xbstream ## Size : $(du -sh ${inc_dir}/$(date +%Y%m%d).xbstream|awk '{print $1}')" >> ${inc_dir}/$(date +%Y%m%d).log
+   rm -rf ${inc_dir}/tmp
+}
+
+# Main
+Check
+if [ $status -eq 0 ]
+then
+    echo "Login test failed . please check your Input whether if ok !"
+    exit 0
+fi
+
+while true
+do
+    case $1 in
+    full)
+    if [ -e "${BAK_DIR}/$(date +%Y%m%d).log" ]
+    then
+        read -p "today you have already backup , do you want to overwirte it [y/n]?" ans
+        while true
+        do
+           case $ans in
+           y)break
+           ;;
+           n)exit 0
+           ;;
+           *)echo "please input [y or n]"
+             exit 0
+           esac
+        done
+        rm -rf ${BAK_DIR}/$(date +%Y%m%d).*
+    fi
+    Backup
+    break
+    ;;
+    inc)
+    if [ -e "${inc_dir}/$(date +%Y%m%d).log" ]
+    then
+        read -p "today you have already backup , do you want to overwirte it [y/n]?" ans
+        while true
+        do
+           case $ans in
+           y)break
+           ;;
+           n)exit 0
+           ;;
+           *)echo "please input [y or n]"
+           esac
+        done
+        rm -rf ${inc_dir}/$(date +%Y%m%d).*
+    fi
+    inc_Backup
+    break
+    ;;
+    *)echo "Usage : sh $0 [full|inc]"
+      exit 0
+    esac
+done

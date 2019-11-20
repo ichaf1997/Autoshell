@@ -5,7 +5,6 @@
 V_ip=192.168.142.20
 R_iparray=(192.168.142.100 192.168.142.120) # Real server Iparrary . use space as separator if you want to add more than one real server
 PORT=80
-BOOTUP_ENABLE=1      # value 1 means allow bootup , else deny
 
 # Install ipvsadm 
 [ "$(rpm -qa|grep ipvsadm|wc -l)" == "0" ] && yum -y install ipvsadm
