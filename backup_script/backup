@@ -2,6 +2,7 @@
 # MySQL backup script . Base on Xtrabackup tool
 # To run this script , follow these steps
 # mysql>grant all privileges on *.* to xtra@'localhost' identified by '123123'
+# Usage : sh $0 [full|inc]
 
 # Input [Global]
 CONF_PATH=/etc/my.cnf
