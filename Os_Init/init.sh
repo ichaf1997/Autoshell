@@ -72,11 +72,11 @@ EOF
   *)
     yum -y install wget >/dev/null 2>&1
     cd /etc/yum.repos.d/
-    wget $YUM_repo >/dev/null 2>&1
+    wget -O /etc/yum.repos.d/Custom.repo $YUM_repo >/dev/null 2>&1
     if [ "$?" == "0" ] 
     then 
         LOG_DUMP ok "Download repo from $YUM_repo"
-        for name in $(ls)
+        for name in $(ls|grep -v "Custom.repo")
         do
             mv $name $name.bak
         done
@@ -187,6 +187,7 @@ func0(){
   sed -i '/linux16 \/boot\/vmlinuz-3/{s/rhgb quiet/vga=817/}' /boot/grub2/grub.cfg
   echo "set ts=2" >> /etc/vimrc
   sed -i 's/#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
+  sed -i 's/LANG="en_US.UTF-8"/LANG="zh_CN.UTF-8"/' /etc/locale.conf
   cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
   cat >> /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1

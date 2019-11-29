@@ -266,14 +266,14 @@ do
             do 
                 while read line
                 do
-                   File $(echo ${line} | awk '{print $1}') ${dfiles} ${sfiles} $(echo ${group_name[@]})
+                   File $(echo ${line} | awk '{print $1}') ${dfiles} "${sfiles}" $(echo ${group_name[@]})
                 done < ${chaff_groupdir}/${group_name[$r]}.group
             done
          else
             log_dump info "Send $sfiles to groups [${group_name[$sel]}]:$dfiles"
             while read line
             do
-                File $(echo ${line} | awk '{print $1}') ${dfiles} ${sfiles} ${group_name[$sel]}
+                File $(echo ${line} | awk '{print $1}') ${dfiles} "${sfiles}" ${group_name[$sel]}
             done < ${chaff_groupdir}/${group_name[$sel]}.group    
          fi
          Menu
