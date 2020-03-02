@@ -23,17 +23,17 @@ TIME_SYNC_FROM="ntp1.aliyun.com"
 APP_LIST=(vim wget mlocate net-tools gcc* openssl* pcre-devel) # APPS arrary , add apps you want to install here , Be careful to use space as separator for every app .
 
 [ -e "/tmp/init.lock" ] && echo "Don't run this script repeatedly !" && exit 0
-echo -e "Time\t$(date +%a\ %b\ %d\ %T\ %Y) - [Start]" > init.log
+echo -e "Time\t$(date +%Y.%m.%d\ %T\ %a) - [Start]" > init.log
 log_path=$(pwd)/init.log
 
 # Define log format
 LOG_DUMP(){
   case $1 in
   ok)
-       echo "$(date +%a\ %b\ %d\ %T\ %Y) - [ok] $2" >> $log_path
+       echo "$(date +%Y.%m.%d\ %T\ %a) - [ok] $2" >> $log_path
   ;;
   no)
-       echo "$(date +%a\ %b\ %d\ %T\ %Y) - [no] $2" >> $log_path
+       echo "$(date +%Y.%m.%d\ %T\ %a) - [no] $2" >> $log_path
   esac
 }
 
@@ -70,9 +70,7 @@ EOF
      fi
   ;;
   *)
-    yum -y install wget >/dev/null 2>&1
-    cd /etc/yum.repos.d/
-    wget -O /etc/yum.repos.d/Custom.repo $YUM_repo >/dev/null 2>&1
+    curl -o /etc/yum.repos.d/CentOS-Base.repo $YUM_repo >/dev/null 2>&1
     if [ "$?" == "0" ] 
     then 
         LOG_DUMP ok "Download repo from $YUM_repo"
@@ -188,7 +186,9 @@ func0(){
   echo "set ts=2" >> /etc/vimrc
   sed -i 's/#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
   sed -i 's/LANG="en_US.UTF-8"/LANG="zh_CN.UTF-8"/' /etc/locale.conf
-  cp -f /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+  sed -i 's/\\w]/\\W]/g' /etc/bashrc
+  rm rf /etc/localtime
+  ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
   cat >> /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
 net.ipv4.ip_local_port_range = 1024 65536
@@ -217,7 +217,7 @@ EOF
 }
 func0
 
-echo -e "Time\t$(date +%a\ %b\ %d\ %T\ %Y) - [Complete]" >> $log_path
+echo -e "Time\t$(date +%Y.%m.%d\ %T\ %a) - [Complete]" >> $log_path
 
 # Generate lock file
 touch /tmp/init.lock

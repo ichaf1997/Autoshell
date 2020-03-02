@@ -26,7 +26,7 @@ install)
         if [ ! -e "${REDIS_URL##*/}" ]    
         then
              wget $REDIS_URL 
-             [ $? -ne 0 ] && echo "Unalbe to download Package from $REDIS_URL " && exit 0
+             [ $? -ne 0 ] && echo "Unable to download Package from $REDIS_URL " && exit 0
         fi
         ## Uncompress package
         if [ ! -d "${REDIS_URL##*/}" ]

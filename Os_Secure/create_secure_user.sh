@@ -11,7 +11,7 @@
      do
           read -p "General user : " user
           id $user >/dev/null 2>&1
-          [ "$?" == "0" ] && break || echo "$user is already exist !"
+          [ "$?" != "0" ] && break || echo "$user is already exist !"
      done
      while true
      do
@@ -27,7 +27,7 @@
      echo -e "general pass\t$pass"
      echo "general user create completely !"          
      # Deny login with root
-     [ "$(cat /etc/ssh/sshd_confi|grep "^PermitRootLogin"|wc -l)" == "1" ] && sed -i 's/^PermitRootLogin/PermitRootLogin no/g' || echo "PermitRootLogin no" >> /etc/ssh/sshd_config
+     [ "$(cat /etc/ssh/sshd_config|grep "^PermitRootLogin"|wc -l)" == "1" ] && sed -i 's/^PermitRootLogin/PermitRootLogin no/g' || echo "PermitRootLogin no" >> /etc/ssh/sshd_config
      systemctl restart sshd
      echo
      echo "Root is forbidden from remote link . instead of , use general user to login system is a safe way ."

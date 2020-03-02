@@ -89,7 +89,7 @@ kill -s 9 \$(ps -ef |grep \"rsync --daemon\"|grep -v \"grep\"|awk -F[\" \"]+ '{p
 rm -rf /var/run/rsyncd.*
 /bin/rsync --daemon
 ;;
-*)echo \"Usage:\$0 [start|stop|restart]\" >/usr/bin/rsync_admin
+*)echo \"Usage:\$0 [start|stop|restart]\" 
 esac" >/usr/bin/rsync_admin
 chmod +x /usr/bin/rsync_admin
 
