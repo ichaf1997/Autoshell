@@ -40,7 +40,7 @@ chk_env(){
   if [ "$?" != "0" ];then
      yum -y install expect >/dev/null 2>&1
      if [ "$?" != "0" ];then
-        log_dump error "Check Environment failed ! expect is unalbe to install in your enviroment ."
+        log_dump error "Check Environment failed ! expect is unable to install in your enviroment ."
      fi
   fi  
   if [ ! -d "${chaff_groupdir}" ];then

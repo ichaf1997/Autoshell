@@ -10,6 +10,7 @@ SELINUX_ENABLE=0
 FIREWALLD_ENABLE=0
 POSTFIX_ENABLE=0
 NetworkManager_ENABLE=0
+TIMESYNC_ENABLE=0
 
 # Input [ string ]
 
@@ -74,6 +75,7 @@ EOF
     if [ "$?" == "0" ] 
     then 
         LOG_DUMP ok "Download repo from $YUM_repo"
+        cd /etc/yum.repos.d
         for name in $(ls|grep -v "Custom.repo")
         do
             mv $name $name.bak
@@ -104,20 +106,21 @@ func2(){
 func2
 
 # Time SYNC
-rpm -qa|grep ntp >/dev/null 2>&1
-if [ "$?" != "0" ];then
-    yum -y install ntp >/dev/null 2>&1
-    if [ "$?" == "0" ];then
-        echo "*/5 * * * * /usr/sbin/ntpdate $TIME_SYNC_FROM">/var/spool/cron/root
-        LOG_DUMP ok "time sync from $TIME_SYNC_FROM"
-    else
-        LOG_DUMP no "time sync from $TIME_SYNC_FROM :: Download ntp failed"
-    fi
-else
-    echo "*/5 * * * * /usr/sbin/ntpdate $TIME_SYNC_FROM">/var/spool/cron/root
-    LOG_DUMP ok "time sync from $TIME_SYNC_FROM"
-fi        
-
+if [ $TIMESYNC_ENABLE -eq 1 ];then
+  rpm -qa|grep ntp >/dev/null 2>&1
+  if [ "$?" != "0" ];then
+      yum -y install ntp >/dev/null 2>&1
+      if [ "$?" == "0" ];then
+          echo "*/5 * * * * /usr/sbin/ntpdate $TIME_SYNC_FROM">/var/spool/cron/root
+          LOG_DUMP ok "time sync from $TIME_SYNC_FROM"
+      else
+          LOG_DUMP no "time sync from $TIME_SYNC_FROM :: Download ntp failed"
+      fi
+  else
+      echo "*/5 * * * * /usr/sbin/ntpdate $TIME_SYNC_FROM">/var/spool/cron/root
+      LOG_DUMP ok "time sync from $TIME_SYNC_FROM"
+  fi        
+fi
 # Hostname
 if [ -n "$HOST_NAME" ]
 then
@@ -187,11 +190,11 @@ func0(){
   sed -i 's/#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
   sed -i 's/LANG="en_US.UTF-8"/LANG="zh_CN.UTF-8"/' /etc/locale.conf
   sed -i 's/\\w]/\\W]/g' /etc/bashrc
-  rm rf /etc/localtime
+  rm -rf /etc/localtime
   ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
   cat >> /etc/sysctl.conf << EOF
 vm.overcommit_memory = 1
-net.ipv4.ip_local_port_range = 1024 65536
+net.ipv4.ip_local_port_range = 1024 65535
 net.ipv4.tcp_fin_timeout = 1
 net.ipv4.tcp_keepalive_time = 1200
 net.ipv4.tcp_mem = 94500000 915000000 927000000
@@ -204,14 +207,14 @@ net.ipv4.tcp_abort_on_overflow = 0
 net.core.rmem_max = 16777216
 net.core.wmem_max = 16777216
 net.core.netdev_max_backlog = 262144
-net.core.somaxconn = 262144
+net.core.somaxconn = 65500
 net.ipv4.tcp_max_orphans = 3276800
 net.ipv4.tcp_max_syn_backlog = 262144
 net.core.wmem_default = 8388608
 net.core.rmem_default = 8388608
-net.ipv4.netfilter.ip_conntrack_max = 2097152
-net.nf_conntrack_max = 655360
-net.netfilter.nf_conntrack_tcp_timeout_established = 1200
+#net.ipv4.netfilter.ip_conntrack_max = 2097152
+#net.nf_conntrack_max = 655360
+#net.netfilter.nf_conntrack_tcp_timeout_established = 1200
 EOF
 /sbin/sysctl -p
 }

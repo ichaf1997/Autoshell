@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# -------------------------
+#
+#   Operation Jump Script 
+#
+# -------------------------
+
+# Version 1.0
+# 2020.03.07 In FoShan GuangDong China
+# By Gopppog 
+
+# Ansible Hosts file Path
+Hosts_PATH=""             # If equal "" , Default value is "/etc/ansible/hosts"
+
+# "Host name" variable in Hosts file , Warnning : It must be set in $2 for AWK tools to carry it
+Hosts_NAME=""       # If equal "" , Default value is HostName
+
+# Watting Time for heiheihei
+Watting_TIME=5      # !!! Life is hard , but you are sweet .
+
+[ "${Hosts_PATH}" == "" ] && Hosts_PATH=/etc/ansible/hosts
+[ "${Hosts_NAME}" == "" ] && Hosts_NAME=HostName
+[ ! -e $Hosts_PATH ] && echo "Error:$Hosts_PATH is not exist"
+cat /etc/ansible/hosts |egrep "^[0-9]" > /tmp/hosts
+
+# Load Ansible Hosts file Information
+Count=0
+while read line
+do
+    Ip_Arrary[$Count]=$(echo $line|awk '{print $1}')
+    HostName_Arrary[$Count]=$(echo $line|awk '{print $2}'|cut -d= -f2|sed 's/"//g')
+    let Count=$Count+1
+done < /tmp/hosts
+
+# Menu
+Menu(){
+for((k=0;k<${Count};k=k+2))
+do
+    let Right=$k+1
+    if [ $Right -lt $Count ];then
+      printf "%-5s %-15s %-5s %-15s\n" [$k] ${HostName_Arrary[$k]} [$Right] ${HostName_Arrary[$Right]}
+    else
+      printf "%-5s %-10s\n" [$k] ${HostName_Arrary[$k]}
+    fi
+done
+}
+
+# Main
+# ---
+if [ $# -eq 0 ];then
+
+echo -e "\e[91m _   _         _____             _   _         ____  _\e[0m"      
+echo -e "\e[91m| \ | | ___   |__  /   _  ___   | \ | | ___   |  _ \(_) ___\e[0m" 
+echo -e "\e[91m|  \| |/ _ \    / / | | |/ _ \  |  \| |/ _ \  | | | | |/ _ \ \e[0m"
+echo -e "\e[91m| |\  | (_) |  / /| |_| | (_) | | |\  | (_) | | |_| | |  __/\e[0m"
+echo -e "\e[91m|_| \_|\___/  /____\__,_|\___/  |_| \_|\___/  |____/|_|\___|
+\e[0m"
+
+for((i=${Watting_TIME};i>0;i--))
+do 
+   echo -ne "\rYou are allowed to opera after $i seconds"
+   sleep 1
+   [ $i -eq 1 ] && echo
+done
+
+Menu
+while true
+do
+  read -p "Please chose the number of Hosts to ssh :" Num
+  expr $Num "+" 10 > /dev/null 2>&1
+  [ $? -ne 0 ] && echo "Input Error!" && continue
+  if [ $Num -gt 0 -a $Num -lt $Count ];then
+     ssh ${Ip_Arrary[$Num]}
+     if [ $? -eq 0 ];then
+        Menu
+     else
+        continue
+     fi
+  else
+     echo "Input Error!"       
+  fi
+done
+
+# ---
+elif [ $# -eq 1 ];then
+  expr $1 "+" 10 > /dev/null 2>&1
+  [ $? -ne 0 ] && echo "Input Error!" && exit
+  if [ $1 -gt 0 -a $1 -lt $Count ];then
+     ssh ${Ip_Arrary[$1]}
+  else
+     echo "Input Error!"
+  fi
+
+# ---
+else
+  echo "Input Error!" && exit
+fi
