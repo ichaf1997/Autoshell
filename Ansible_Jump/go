@@ -70,7 +70,7 @@ do
   read -p "Please chose the number of Hosts to ssh :" Num
   expr $Num "+" 10 > /dev/null 2>&1
   [ $? -ne 0 ] && echo "Input Error!" && continue
-  if [ $Num -gt 0 -a $Num -lt $Count ];then
+  if [ $Num -ge 0 -a $Num -lt $Count ];then
      ssh ${Ip_Arrary[$Num]}
      if [ $? -eq 0 ];then
         Menu
@@ -86,7 +86,7 @@ done
 elif [ $# -eq 1 ];then
   expr $1 "+" 10 > /dev/null 2>&1
   [ $? -ne 0 ] && echo "Input Error!" && exit
-  if [ $1 -gt 0 -a $1 -lt $Count ];then
+  if [ $1 -ge 0 -a $1 -lt $Count ];then
      ssh ${Ip_Arrary[$1]}
   else
      echo "Input Error!"
