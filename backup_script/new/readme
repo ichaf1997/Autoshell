@@ -1,0 +1,6 @@
+# To Use This Script , Please Follow these steps
+# Step 1. /bin/sh admin.sh install
+# Step 2. Unmark '#' in Crontab to make a task
+
+# To Remove This Script
+# Step 1. /bin/bash admin.sh remove

@@ -12,7 +12,7 @@ mon_log=/tmp/failed.log
 
 # Ip in white_list will not be add to iptables 
 white_list_enable=1         ## value 1 means open white_list , value 0 means close white_list
-white_list=(192.168.142.86) ## IP Arrary . notice that IP format whether if correct , use blank as separator if you want add more than one ip in white_list
+white_list=(183.233.176.20) ## IP Arrary . notice that IP format whether if correct , use blank as separator if you want add more than one ip in white_list
 
 [ ! -e "$mon_log" ] && touch $mon_log
 echo >> $mon_log
