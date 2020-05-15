@@ -74,7 +74,7 @@ EOF
   None)
   ;;
   *)
-    curl -o /etc/yum.repos.d/CentOS-Base.repo $YUM_repo >/dev/null 2>&1
+    curl -o /etc/yum.repos.d/Custom.repo $YUM_repo >/dev/null 2>&1
     if [ "$?" == "0" ] 
     then 
         LOG_DUMP ok "Download repo from $YUM_repo"
