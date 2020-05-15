@@ -19,7 +19,8 @@ SOFT_NOFILE=65535      # modify /etc/security/limits.conf
 HARD_NOFILE=65535
 SOFT_NOPROC=65535
 HARD_NOPROC=65535
-YUM_repo="DVD"         # If you don't want to use local repo . modify here as URL
+YUM_repo="DVD"         # If you don't want to use local repo . modify here as remote repo URL 
+                       # If you don't want to change anything . modify here as "None"
 TIME_SYNC_FROM="ntp1.aliyun.com" 
 APP_LIST=(vim wget mlocate net-tools gcc* openssl* pcre-devel) # APPS arrary , add apps you want to install here , Be careful to use space as separator for every app .
 
@@ -69,6 +70,8 @@ EOF
      else
           LOG_DUMP no "Use local dvd repo :: DVD no found"
      fi
+  ;;
+  None)
   ;;
   *)
     curl -o /etc/yum.repos.d/CentOS-Base.repo $YUM_repo >/dev/null 2>&1
@@ -188,7 +191,7 @@ func0(){
   sed -i '/linux16 \/boot\/vmlinuz-3/{s/rhgb quiet/vga=817/}' /boot/grub2/grub.cfg
   echo "set ts=2" >> /etc/vimrc
   sed -i 's/#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
-  sed -i 's/LANG="en_US.UTF-8"/LANG="zh_CN.UTF-8"/' /etc/locale.conf
+  #sed -i 's/LANG="en_US.UTF-8"/LANG="zh_CN.UTF-8"/' /etc/locale.conf
   sed -i 's/\\w]/\\W]/g' /etc/bashrc
   rm -rf /etc/localtime
   ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime

@@ -1,5 +1,4 @@
 #!/bin/bash
-export LANG=en_US.UTF-8
 export DATE=$(date +%Y%m%d)
 export BAK_SAVE_DIR=
 export DB_NAME=

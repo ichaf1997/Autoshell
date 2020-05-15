@@ -6,18 +6,17 @@
 #
 # -------------------------
 
-# Version 1.0
-# 2020.03.07 In FoShan GuangDong China
-# By Gopppog 
-
 # Ansible Hosts file Path
 Hosts_PATH=""             # If equal "" , Default value is "/etc/ansible/hosts"
 
 # "Host name" variable in Hosts file , Warnning : It must be set in $2 for AWK tools to carry it
 Hosts_NAME=""       # If equal "" , Default value is HostName
 
+# whether if Show Details of Menu , values 1 means that show more details of menu , else none.
+Details_Enable=1
+
 # Watting Time for heiheihei
-Watting_TIME=5      # !!! Life is hard , but you are sweet .
+Watting_TIME=0      # !!! Life is hard , but you are sweet .
 
 [ "${Hosts_PATH}" == "" ] && Hosts_PATH=/etc/ansible/hosts
 [ "${Hosts_NAME}" == "" ] && Hosts_NAME=HostName
@@ -35,15 +34,22 @@ done < /tmp/hosts
 
 # Menu
 Menu(){
-for((k=0;k<${Count};k=k+2))
-do
-    let Right=$k+1
-    if [ $Right -lt $Count ];then
-      printf "%-5s %-15s %-5s %-15s\n" [$k] ${HostName_Arrary[$k]} [$Right] ${HostName_Arrary[$Right]}
-    else
-      printf "%-5s %-10s\n" [$k] ${HostName_Arrary[$k]}
-    fi
-done
+if [ $1 -eq 1 ];then
+  for((k=0;k<${Count};k=k+1))
+  do
+      printf "%-5s %-17s %-10s\n" [$k] ${HostName_Arrary[$k]} ${Ip_Arrary[$k]}
+  done
+else
+  for((k=0;k<${Count};k=k+2))
+  do
+      let Right=$k+1
+      if [ $Right -lt $Count ];then
+        printf "%-5s %-15s %-5s %-15s\n" [$k] ${HostName_Arrary[$k]} [$Right] ${HostName_Arrary[$Right]}
+      else
+        printf "%-5s %-10s\n" [$k] ${HostName_Arrary[$k]}
+      fi
+  done
+fi
 }
 
 # Main
@@ -64,7 +70,7 @@ do
    [ $i -eq 1 ] && echo
 done
 
-Menu
+Menu $Details_Enable
 while true
 do
   read -p "Please chose the number of Hosts to ssh :" Num
@@ -73,7 +79,7 @@ do
   if [ $Num -ge 0 -a $Num -lt $Count ];then
      ssh ${Ip_Arrary[$Num]}
      if [ $? -eq 0 ];then
-        Menu
+        Menu $Details_Enable
      else
         continue
      fi

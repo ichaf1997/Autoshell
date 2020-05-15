@@ -1,0 +1,105 @@
+{
+  "name": "xunjian",
+  "version": "1.0.0",
+  "SERVICES": {
+    "RMIS-PC应用服务器1": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.87/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS-PC应用服务器2": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.82/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS-PC应用服务器3": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.83/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS-PC应用服务器4": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.84/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS-PC应用服务器5": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.85/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS-PC应用服务器6": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.229/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS-APP应用服务器1": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.231/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS-APP应用服务器2": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.232/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS-APP应用服务器3": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.233/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS-APP应用服务器4": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.234/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS-APP应用服务器5": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://19.104.50.235/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "RMIS客服服务器": {
+      "check_mthod": "urlcheck",
+      "action": null,
+      "input": {
+        "url": "http://192.168.0.91:8090/rmis/gdp/sysman/xlogin/login.jsp"
+      }
+    },
+    "ICMP封包测试": {
+      "check_mthod": "pingcheck",
+      "action": null,
+      "input": ["192.168.0.93"
+      ]
+    },
+    "236数据库": {
+      "check_mthod": "portcheck",
+      "action": null,
+      "input": {
+        "host": "192.168.2.236",
+        "port": "50000"
+      }
+    }
+  }
+
+}

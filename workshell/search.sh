@@ -1,15 +1,30 @@
 #!/bin/bash
-n=0
-for File in $(find / -name "*.xml" -o -name "*.properties")
-do
-    cat $File |grep ProjMService > /dev/null 2>&1
-    if [ $? -eq 0 ];then
-       echo "$File 存在关键字\"ProjMService\""
-       let n=n+1
-    fi
-done
-if [ $n -eq 0 ];then
-   echo "查找完成，没有找到符合要求的文件"
-else
-   echo "查找完成，找到$n个符合要求的文件"
-fi
+# Usage:sh $0 dir_path "key_words"
+[ $# -ne 2 ] && echo 'Usage:sh $0 dir_path "key_words"' && exit 0
+
+dir_path=$1
+key_words=$2
+
+get_path(){
+   n=0
+   while read path
+   do
+       Possible_Conf_files_Array[$n]=${path}
+       let n=$n+1
+   done < find.tmp
+}
+
+dump_files_with_keywords(){
+   for ((i=0;i<${n};i++))
+   do
+       cat ${Possible_Conf_files_Array[$i]} | grep "$key_words" > /dev/null 2>&1
+       [ $? -eq 0 ] && echo "${Possible_Conf_files_Array[$i]}"
+   done
+   rm -rf find.tmp
+}
+echo "=============Start to find $key_words in $dir_path============="
+find $dir_path \( -name "*.xml" -o -name "*.json" -o -name "*.properties" \) -exec echo {} > find.tmp \;
+get_path
+dump_files_with_keywords
+echo "Done."
+

@@ -1,6 +1,5 @@
 #!/bin/bash
 # db2 backup script
-export LANG=en_US.UTF-8
 export DATE=$(date +%Y%m%d)
 export BAK_SAVE_DIR=
 export BAK_SAVE_TIME=
@@ -58,6 +57,8 @@ full_bak(){
 # Incremental backup
 inc_bak(){
    su - $DB_USER -c /usr/local/sbin/exec_incbak.sh >> $BAK_SAVE_DIR/$BAK_METHOD/$DATE.log
+   image_num=$(cat $BAK_SAVE_DIR/$BAK_METHOD/$DATE.log|grep image|awk '{print $NF}')
+   su - $DB_USER -c "db2ckrst -d $DB_NAME -t $image_num -r database" >> $BAK_SAVE_DIR/$BAK_METHOD/$DATE.log
    if [ "$(cat $BAK_SAVE_DIR/$BAK_METHOD/$DATE.log|grep "Backup successful"|wc -l)" == "0" ];then
       bak_status=FAILED
       bak_file=None

@@ -1,0 +1,14 @@
+{
+  "receive_mail": ["ichaff@163.com", "18307854083@163.com"],
+  "auth_mail_setting": {
+      "mail_host": "smtp.qq.com",
+      "mail_user": "2279746031",
+      "mail_pass": "ktbygcjzbrandjde",
+      "mail_sender": "2279746031@qq.com"
+  },
+  "version": "1.0",
+
+  "dependencies": {
+    
+  }
+}
