@@ -1,0 +1,39 @@
+- hosts: rmispc
+  remote_user: root
+  gather_facts: no
+  vars:
+   - update_packages_dir: /Opera_Station/Update/rmis/{{package}}
+   - app_dir: /data/tomcat_rmis/webapps
+   - uncompress_cmd: unzip
+  tasks:
+   - fail: msg='Update package path is undefined Stop here'
+     when: package is undefined
+   - fail: msg='Update package {{update_packages_dir}} is not exist Stop here'
+     when: update_packages_dir is not file
+   - name: 'Transfer Package {{package}} to remote hosts'
+     copy:
+       src={{update_packages_dir}}
+       dest=/tmp/{{package}}
+       follow=yes
+   - name: 'Remove old update files '
+     file:
+      path=/tmp/update
+      state=absent    
+   - name: 'Uncompress Update package of remote hosts'
+     shell: cd /tmp && unzip {{package}}
+     ignore_errors: true
+     when: uncompress_cmd == 'unzip'
+   - name: 'Stop Applications'
+     shell: /bin/sh /usr/local/sbin/rmis stop
+     ignore_errors: true
+   - name: 'Updating'
+     script: /usr/local/sbin/rmis_update.sh {{app_dir}}/rmis/
+   - name: 'Modify Privileges 744 of application directory'
+     command: chmod -Rf 744 {{app_dir}} 
+   - name: 'Modify Owner tomcat of application directory'
+     command: chown -Rf tomcat.tomcat {{app_dir}}
+#   - name: 'Restart Applications'
+#     command: /bin/sh /usr/local/sbin/rmis restart
+#     ignore_errors: true 
+
+

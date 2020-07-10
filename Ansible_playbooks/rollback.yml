@@ -1,0 +1,36 @@
+- hosts: rmispc
+  remote_user: root
+  gather_facts: no
+  vars:
+   - backup_dir: /data/version_backup
+   - app_dir: /data/tomcat_rmis/webapps
+  tasks:
+   - fail: msg='Timestamp is undefined'
+     when: stamp is undefined
+   - shell: test -d {{backup_dir}}/{{stamp}}
+     register: stamp_exist
+     ignore_errors: true
+   - shell: test -d {{app_dir}}
+     register: app_exist
+     ignore_errors: true
+   - fail: msg='Applications directory {{app_dir}} is not existed Stop here'
+     when: app_exist.rc != 0
+   - fail: msg='Backup Timestamp {{stamp}} is not existed Stop here'
+     when: stamp_exist.rc != 0
+   - name: 'Stop Applications'
+     shell: /usr/local/sbin/rmis stop
+     ignore_errors: true
+   - name: 'Remove new application directory {{app_dir}}'
+     file:
+        path={{app_dir}}
+        state=absent
+   - name: 'Restore old application directory from Backup {{stamp}}'
+     shell: cp -rf {{backup_dir}}/{{stamp}} {{app_dir}}
+   - name: 'Modify Privileges to 744 of applications {{app_dir}}'
+     shell: chmod -Rf 744 {{app_dir}}
+   - name: 'Modify Owner to tomcat of applications {{app_dir}}'
+     shell: chown -Rf tomcat.tomcat {{app_dir}}
+     ignore_errors: true
+   #- name: 'Start Applications'
+   #  shell: /usr/local/sbin/rmis start
+   #  ignore_errors: true

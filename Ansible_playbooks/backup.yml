@@ -1,0 +1,30 @@
+- hosts: rmispc
+  remote_user: root
+  gather_facts: no
+  vars:
+   - backup_dir: /data/version_backup
+   - app_dir: /data/tomcat_rmis/webapps
+  tasks:
+   - fail: msg='Timestamp is undefined'
+     when: stamp is undefined
+   - shell: test -d {{backup_dir}}/{{stamp}}
+     register: stamp_exist
+     ignore_errors: true
+   - shell: test -d {{app_dir}}
+     register: app_exist
+     ignore_errors: true
+   - fail: msg='Applications directory {{app_dir}} is not exist Stop here'
+     when: app_exist.rc != 0
+   - fail: msg='Backup Timestamp {{stamp}} is existed  Stop here'
+     when: stamp_exist.rc == 0
+   - name: 'Stop Applications'
+     command: /usr/local/sbin/rmis stop
+     ignore_errors: true
+   - name: 'Create Backup directory {{backup_dir}}'
+     file:
+       path={{backup_dir}}
+       state=directory
+   - name: 'Backup webapps to {{backup_dir}} using timestamp {{stamp}}'
+     shell: cp -rf {{app_dir}} {{backup_dir}}/{{stamp}}
+
+

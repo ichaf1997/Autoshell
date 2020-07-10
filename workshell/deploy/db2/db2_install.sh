@@ -1,6 +1,7 @@
 #!/bin/bash
 Version=10.5
 License_Map=/opt/db2v10.5ese_u.lic
+Listen_port=50000
 sed -i "s/127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4/127.0.0.1   $(hostname) localhost localhost.localdomain localhost4 localhost4.localdomain4/g" /etc/hosts
 sed -i "s/::1         localhost localhost.localdomain localhost6 localhost6.localdomain6/::1         $(hostname) localhost localhost.localdomain localhost6 localhost6.localdomain6/g" /etc/hosts
 groupadd  db2iadm1  
@@ -21,6 +22,15 @@ su - db2admin -c "db2set DB2_EXTENDED_OPTIMIZATION=ON"
 su - db2admin -c "db2set DB2_DISABLE_FLUSH_LOG=ON"
 su - db2admin -c "db2set AUTOSTART=YES"
 su - db2admin -c "db2set DB2_HASH_JOIN=YES"
-su - db2admin -c "db2set DB2COMM=tcpip"
+su - db2admin -c "db2set DB2COMM=TCPIP"
 su - db2admin -c "db2set DB2_PARALLEL_IO=*"
 su - db2admin -c "db2set DB2CODEPAGE=1208"
+cat /etc/services|grep db2ser > /dev/null 2>&1
+if [ $? -ne 0 ];then
+   echo "db2ser $Listen_port/tcp" >> /etc/services
+fi
+su - db2admin -c "db2start"
+su - db2admin -c "db2 update dbm cfg using SVCENAME db2ser"
+su - db2admin -c "db2stop"
+su - db2admin -c "db2start"
+
