@@ -21,7 +21,7 @@ Watting_TIME=0      # !!! Life is hard , but you are sweet .
 [ "${Hosts_PATH}" == "" ] && Hosts_PATH=/etc/ansible/hosts
 [ "${Hosts_NAME}" == "" ] && Hosts_NAME=HostName
 [ ! -e $Hosts_PATH ] && echo "Error:$Hosts_PATH is not exist"
-cat /etc/ansible/hosts |egrep "^[0-9]" > /tmp/hosts
+cat $Hosts_PATH |egrep "^[0-9]" > /tmp/hosts
 
 # Load Ansible Hosts file Information
 Count=0
