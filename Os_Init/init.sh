@@ -145,8 +145,8 @@ then
 # MaxFileControl by Init.sh
 *           soft   nofile       $SOFT_NOFILE
 *           hard   nofile       $HARD_NOFILE
-*           soft   noproc       $SOFT_NOPROC
-*           hard   noproc       $HARD_NOPROC     
+*           soft   nproc       $SOFT_NOPROC
+*           hard   nproc       $HARD_NOPROC     
 EOF
     ulimit -n $HARD_NOFILE
     LOG_DUMP ok "modify MaxFileControl soft=$SOFT_NOFILE hard=$HARD_NOFILE"
