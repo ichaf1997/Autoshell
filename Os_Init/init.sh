@@ -192,6 +192,7 @@ func0(){
   echo "set ts=2" >> /etc/vimrc
   sed -i 's/#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
   #sed -i 's/LANG="en_US.UTF-8"/LANG="zh_CN.UTF-8"/' /etc/locale.conf
+  echo LANG=\"zh_CN.UTF-8\" /etc/locale.conf
   sed -i 's/\\w]/\\W]/g' /etc/bashrc
   rm -rf /etc/localtime
   ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
