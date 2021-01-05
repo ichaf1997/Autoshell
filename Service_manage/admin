@@ -1,0 +1,137 @@
+#!/bin/bash
+
+default_ports=8888,8889  # separate by ','
+
+function INFO(){
+  echo "Leader-View applications manage Script"
+  echo "Usage: $0 start|stop|restart|status|log [options]"
+  echo "options:"
+  echo "--inspect=all(default) / --inspect=port1,port2,... (8888,8889,8890 eg.)"
+  echo "--tail=xxx (If not set the number of tail , standard stdout will be display appendly)"
+  exit 0
+}
+
+function START(){
+  APP_STATUS=0
+  cd /data/leader-view && /data/jdk1.8.0_181/bin/java -jar /data/leader-view/leader-view-0.7.3.jar --spring.profiles.active=prod --server.port=$1 > /dev/null 2>&1 &
+  echo $(date +%Y-%m-%d\ %H:%M:%S) [leader-view-$1] Started
+  for ((i=0;i<3;i++))
+  do
+      netstat -lntp|grep -w :::$1 > /dev/null 2>&1
+      [ $? -eq 0 ] && APP_STATUS=1 && echo $(date +%Y-%m-%d\ %H:%M:%S) [leader-view] is Running. Listen 0.0.0.0 on port $1 && break
+      sleep 10
+  done
+  [ $APP_STATUS -eq 0 ] && echo $(date +%Y-%m-%d\ %H:%M:%S) [leader-view-$1] Failed to start.
+}
+
+function STOP(){
+  pid=$(netstat -lntp|grep -w :::$1|awk '{print $NF}'|cut -d/ -f1)
+  if [ -z $pid ];then
+      echo $(date +%Y-%m-%d\ %H:%M:%S) kill [leader-view-$1] Skipping ... PID is null.
+  else
+      kill -s 9 $pid > /dev/null 2>&1
+      echo $(date +%Y-%m-%d\ %H:%M:%S) kill [leader-view-$1] PID is $pid
+  fi
+} 
+
+function STATUS(){
+  netstat -lntp|grep -w :::$1 > /dev/null 2>&1
+  if [ $? -eq 0 ];then
+     echo $(date +%Y-%m-%d\ %H:%M:%S) [leader-view-$1] is Up .
+  else
+     echo $(date +%Y-%m-%d\ %H:%M:%S) [leader-view-$1] is Down .
+  fi 
+}
+
+function LOG(){
+  echo $1 | grep -q "^[0-9]\+$"
+  if [ $? -eq 0 ];then
+     tail -$1 /data/leader-view/log/leader-view.log
+  else
+     tail -f /data/leader-view/log/leader-view.log
+  fi
+}
+
+if [ $# -gt 0 -a $# -le 2 ];then
+   [ -n "$2" ] && echo $2 | grep -Eqv "\-\-inspect=|\-\-tail=" && INFO
+   for var in $@;
+   do
+       echo $var|grep -q "\-\-inspect="
+       [ $? -eq 0 ] && app_port=$(echo $var|cut -d= -f2)
+       echo $var|grep -q "\-\-tail="
+       [ $? -eq 0 ] && log_nums=$(echo $var|cut -d= -f2)
+   done
+   [[ "$app_port" == "all" ]] || [[ -z $app_port ]] && app_port=$default_ports
+   IFS=","
+   case $1 in
+   start) 
+         for p in ${app_port[@]};
+         do 
+         {
+             echo $p|grep -q "^[0-9]\+$"
+             if [ $? -eq 0 ];then
+                 START $p
+             else
+                 echo $(date +%Y-%m-%d\ %H:%M:%S) [port $p] is invalid, Skip start...
+                 exit 0 
+             fi
+         } & 
+         done
+         wait
+   ;;
+   stop)
+         for p in ${app_port[@]};
+         do
+         {
+             echo $p|grep -q "^[0-9]\+$"
+             if [ $? -eq 0 ];then
+                 STOP $p
+             else
+                 echo $(date +%Y-%m-%d\ %H:%M:%S) [port $p] is invalid, Skip stop...
+                 exit 0
+             fi
+         } &
+         done
+         wait
+   ;;
+   restart)
+         for p in ${app_port[@]};
+         do
+         {
+             echo $p|grep -q "^[0-9]\+$"
+             if [ $? -eq 0 ];then
+                 STOP $p
+                 START $p
+             else
+                 echo $(date +%Y-%m-%d\ %H:%M:%S) [port $p] is invalid, Skip restart...
+                 exit 0
+             fi
+         } &
+         done
+         wait
+   ;;
+   status)
+         for p in ${app_port[@]};
+         do
+         {
+             echo $p|grep -q "^[0-9]\+$"
+             if [ $? -eq 0 ];then
+                 STATUS $p
+             else
+                 echo $(date +%Y-%m-%d\ %H:%M:%S) [port $p] is invalid
+                 exit 0 
+             fi
+         }
+         done &
+         wait
+   ;;
+   log) 
+         LOG $log_nums
+   ;;
+   *)
+     INFO
+   esac  
+else
+   INFO
+fi
+
